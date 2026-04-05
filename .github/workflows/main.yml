@@ -1,7 +1,7 @@
 name: Build EXE
 on: [workflow_dispatch]
 
-# This fixes the Node.js 20 deprecation warning
+# This line officially opts into Node.js 24 and clears the warning
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
@@ -18,14 +18,12 @@ jobs:
         uses: microsoft/setup-msbuild@v2
 
       - name: Build Solution
-        run: msbuild VMP-Imports-Deobfuscator.sln /p:Configuration=Release /p:Platform=x64
+        # Using /p:OutDir ensures the files land in a predictable spot
+        run: msbuild VMP-Imports-Deobfuscator.sln /p:Configuration=Release /p:Platform=x64 /p:OutDir=D:\a\VMP-Output\
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
           name: VMP-Deobfuscator-Exe
-          # This pattern finds the exe in any subfolder's Release directory
-          path: |
-            **/Release/*.exe
-            **/x64/Release/*.exe
-            **/bin/Release/*.exe
+          # We point directly to the forced OutDir from the build step
+          path: D:\a\VMP-Output\*.exe
